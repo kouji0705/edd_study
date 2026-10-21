@@ -6,12 +6,13 @@ TypeScriptを使い、バトルシステムを段階的に実装しながら、S
 
 ## 現在の状態
 
-Step 1（バトル開始から1ターン終了まで）を実装済みです。
+Step 2（Sectionによる構造化）を実装済みです。実行結果はStep 1と同じです。
 
 - このREADME：学習全体の方針とロードマップ
 - [Step 1の設計書](step1.md)：1ターンの仕様、処理図、期待結果、テストケース
+- [Step 2の設計書](step2.md)：Sectionの階層、入出力、テストケース
 - 実装：`src/main.ts` と `src/battle/`
-- テスト：`tests/step1.test.ts`
+- テスト：`tests/step1.test.ts`、`tests/step2.test.ts`
 
 ## 実行方法
 
@@ -82,6 +83,8 @@ Step 1で作成したバトル処理を、役割ごとにSectionへ分割しま�
 - Sectionの責務を定義する
 - Sectionを階層的に組み合わせる
 - Sectionの実行順序を管理する
+
+詳細は[Step 2の設計書](step2.md)を参照してください。
 
 **確認条件：Step 1と最終状態・処理順序が一致すること。**
 
