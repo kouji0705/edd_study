@@ -6,12 +6,23 @@ TypeScriptを使い、バトルシステムを段階的に実装しながら、S
 
 ## 現在の状態
 
-現在は設計・学習計画の段階です。実装コード、`package.json`、実行・テスト環境はまだありません。
+Step 1（バトル開始から1ターン終了まで）を実装済みです。
 
 - このREADME：学習全体の方針とロードマップ
 - [Step 1の設計書](step1.md)：1ターンの仕様、処理図、期待結果、テストケース
+- 実装：`src/main.ts` と `src/battle/`
+- テスト：`tests/step1.test.ts`
 
-まずStep 1の設計書に沿って実装します。実行環境を追加する際に、使用するNode.jsのバージョンとインストール・実行・テストのコマンドを記載します。
+## 実行方法
+
+Node.js 26 で動作を確認しています。TypeScriptは型情報を除去して Node.js が直接実行します。
+
+```bash
+npm install
+npm start
+npm test
+npm run typecheck
+```
 
 ## 背景
 
@@ -141,7 +152,7 @@ Sectionの処理中にEventを発火させ、個別の仕様をEventHandlerで�
 ## 技術スタック
 
 - TypeScript
-- Node.js
+- Node.js 22.18 以上（確認環境は Node.js 26）
 
 ## 学習方針
 
