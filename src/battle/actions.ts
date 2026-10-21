@@ -1,7 +1,13 @@
+import type { ActionBuffer, Section } from "./section.ts";
 import type { Action, BattleState, Pokemon, PokemonId } from "./types.ts";
 
 const MOVE_EARTHQUAKE = "じしん";
 const DAMAGE = 20;
+
+const POKEMON_NAMES: Record<PokemonId, string> = {
+  garchomp: "ガブリアス",
+  hippowdon: "カバルドン",
+};
 
 function findPokemon(state: BattleState, id: PokemonId): Pokemon {
   const pokemon = state.pokemon.find((candidate) => candidate.id === id);
@@ -50,4 +56,43 @@ export function executeAction(state: BattleState, action: Action): BattleState {
   state.logs.push(`${target.name}に${DAMAGE}ダメージ！`);
 
   return state;
+}
+
+export function createSelectActionsSection(buffer: ActionBuffer): Section {
+  return {
+    name: "SelectActions",
+    run(state) {
+      buffer.actions = selectActions(state);
+      return state;
+    },
+  };
+}
+
+export function createDecideActionOrderSection(buffer: ActionBuffer): Section {
+  return {
+    name: "DecideActionOrder",
+    run(state) {
+      buffer.actions = decideActionOrder(buffer.actions, state);
+      return state;
+    },
+  };
+}
+
+export function createExecuteActionSection(action: Action): Section {
+  return {
+    name: `ExecuteAction:${POKEMON_NAMES[action.actorId]}`,
+    run(state) {
+      return executeAction(state, action);
+    },
+  };
+}
+
+export function createExecuteActionsSection(buffer: ActionBuffer): Section {
+  return {
+    name: "ExecuteActions",
+    run(state, runner) {
+      const sections = buffer.actions.map((action) => createExecuteActionSection(action));
+      return runner.runAll(sections, state);
+    },
+  };
 }
