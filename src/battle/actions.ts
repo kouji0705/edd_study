@@ -1,8 +1,9 @@
+import type { BattleEvent, EventBus } from "./event.ts";
 import type { ActionBuffer, Section } from "./section.ts";
 import type { Action, BattleState, Pokemon, PokemonId } from "./types.ts";
 
 const MOVE_EARTHQUAKE = "じしん";
-const DAMAGE = 20;
+const BASE_DAMAGE = 20;
 
 const POKEMON_NAMES: Record<PokemonId, string> = {
   garchomp: "ガブリアス",
@@ -47,13 +48,38 @@ export function decideActionOrder(actions: Action[], state: BattleState): Action
   return ordered;
 }
 
-export function executeAction(state: BattleState, action: Action): BattleState {
+export function executeAction(
+  state: BattleState,
+  action: Action,
+  events?: EventBus,
+): BattleState {
   const actor = findPokemon(state, action.actorId);
   const target = findPokemon(state, action.targetId);
 
   state.logs.push(`${actor.name}の${action.move}！`);
-  target.currentHp -= DAMAGE;
-  state.logs.push(`${target.name}に${DAMAGE}ダメージ！`);
+
+  const damageEvent: BattleEvent = {
+    kind: "beforeDamage",
+    actorId: actor.id,
+    targetId: target.id,
+    move: action.move,
+    damage: BASE_DAMAGE,
+  };
+  events?.emit(damageEvent, state);
+
+  target.currentHp -= damageEvent.damage;
+  state.logs.push(`${target.name}に${damageEvent.damage}ダメージ！`);
+
+  events?.emit(
+    {
+      kind: "afterDamage",
+      actorId: actor.id,
+      targetId: target.id,
+      move: action.move,
+      damage: damageEvent.damage,
+    },
+    state,
+  );
 
   return state;
 }
@@ -78,20 +104,20 @@ export function createDecideActionOrderSection(buffer: ActionBuffer): Section {
   };
 }
 
-export function createExecuteActionSection(action: Action): Section {
+export function createExecuteActionSection(action: Action, events?: EventBus): Section {
   return {
     name: `ExecuteAction:${POKEMON_NAMES[action.actorId]}`,
     run(state) {
-      return executeAction(state, action);
+      return executeAction(state, action, events);
     },
   };
 }
 
-export function createExecuteActionsSection(buffer: ActionBuffer): Section {
+export function createExecuteActionsSection(buffer: ActionBuffer, events?: EventBus): Section {
   return {
     name: "ExecuteActions",
     run(state, runner) {
-      const sections = buffer.actions.map((action) => createExecuteActionSection(action));
+      const sections = buffer.actions.map((action) => createExecuteActionSection(action, events));
       return runner.runAll(sections, state);
     },
   };

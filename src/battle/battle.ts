@@ -1,3 +1,4 @@
+import type { EventBus } from "./event.ts";
 import { createSectionRunner, type Section } from "./section.ts";
 import { createTurnSection } from "./turn.ts";
 import type { BattleState, Pokemon } from "./types.ts";
@@ -44,7 +45,7 @@ function createAppearPokemonSection(name: string, createPokemon: () => Pokemon):
   };
 }
 
-export function createBattleSection(): Section {
+export function createBattleSection(events?: EventBus): Section {
   return {
     name: "Battle",
     run(state, runner) {
@@ -53,7 +54,7 @@ export function createBattleSection(): Section {
           createBattleStartSection(),
           createAppearPokemonSection("ガブリアス", createGarchomp),
           createAppearPokemonSection("カバルドン", createHippowdon),
-          createTurnSection(),
+          createTurnSection(events),
         ],
         state,
       );
@@ -61,12 +62,12 @@ export function createBattleSection(): Section {
   };
 }
 
-export function runBattle(): BattleState {
+export function runBattle(events?: EventBus): BattleState {
   const state: BattleState = {
     turn: 0,
     pokemon: [],
     logs: [],
   };
   const runner = createSectionRunner();
-  return runner.run(createBattleSection(), state);
+  return runner.run(createBattleSection(events), state);
 }
