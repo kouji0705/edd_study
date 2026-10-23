@@ -35,14 +35,5 @@ export function formatBattleResult(state: BattleState): string {
   return `${sections.map((section) => section.join("\n")).join("\n\n")}\n\n${hpLines.join("\n")}`;
 }
 
-function isExecutedDirectly(): boolean {
-  const entry = process.argv[1];
-  if (entry === undefined) {
-    return false;
-  }
-  return import.meta.url === pathToFileURL(entry).href;
-}
 
-if (isExecutedDirectly()) {
-  console.log(formatBattleResult(runBattle()));
-}
+console.log(formatBattleResult(runBattle()));
