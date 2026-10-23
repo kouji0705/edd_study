@@ -1,5 +1,4 @@
-import { pathToFileURL } from "node:url";
-import { runBattle } from "./battle/battle.ts";
+import { runStaticScenario } from "./battle/scenario.ts";
 import type { BattleState } from "./battle/types.ts";
 
 /** 実行ログを表示用に区切り、末尾へ最終HPを付ける。区切りの空行はログ自体には含めない。 */
@@ -36,4 +35,8 @@ export function formatBattleResult(state: BattleState): string {
 }
 
 
-console.log(formatBattleResult(runBattle()));
+console.log(
+  formatBattleResult(
+    runStaticScenario({ staticActivates: true, attackerItem: "cheri" }),
+  ),
+);

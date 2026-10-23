@@ -261,7 +261,7 @@ src/battle/
 └── actions.ts     contact を Event に載せる
 ```
 
-連鎖シナリオの入口は `src/battle/scenario.ts` の `runStaticScenario` とする。`npm start` は `runBattle()` のままにする。
+連鎖シナリオの入口は `src/battle/scenario.ts` の `runStaticScenario` とする。`npm start` はせいでんき成功・クラボのみ所持の `runStaticScenario` を表示する。`runBattle()` はハンドラなしの標準シナリオのまま残す。
 
 ```typescript
 export function runStaticScenario(options: {
