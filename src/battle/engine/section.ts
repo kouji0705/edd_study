@@ -1,10 +1,6 @@
-import type { Action, BattleState } from "./types.ts";
+import type { BattleState } from "../domain/types.ts";
 
 const EXECUTION_LIMIT = 32;
-
-export type ActionBuffer = {
-  actions: Action[];
-};
 
 export type Section = {
   name: string;

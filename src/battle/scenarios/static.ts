@@ -1,10 +1,10 @@
-import { createEventBus, type EventBus, type EventHandler } from "./event.ts";
-import { registerStaticHandlers } from "./handlers.ts";
-import { createBattleFlow, runNewBattle } from "./battle-flow.ts";
-import { POKEMON_NAMES } from "./pokemon.ts";
-import type { Section } from "./section.ts";
-import { createTurnSection } from "./turn.ts";
-import type { Action, BattleState, Item, Pokemon } from "./types.ts";
+import { createEventBus, type EventBus, type EventHandler } from "../engine/event.ts";
+import { registerStaticHandlers } from "../domain/handlers.ts";
+import { createBattleFlow, runNewBattle } from "../flow/battle-flow.ts";
+import { POKEMON_NAMES } from "../domain/pokemon.ts";
+import type { Section } from "../engine/section.ts";
+import { createTurnSection } from "../flow/turn.ts";
+import type { Action, BattleState, Item, Pokemon } from "../domain/types.ts";
 
 export type StaticScenarioOptions = {
   staticActivates: boolean;

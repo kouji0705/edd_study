@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { executeAction } from "../src/battle/actions.ts";
-import { runBattle } from "../src/battle/battle.ts";
-import { createEventBus, type EventHandler } from "../src/battle/event.ts";
-import type { Action, BattleState } from "../src/battle/types.ts";
+import { executeAction } from "../src/battle/domain/actions.ts";
+import { runBattle } from "../src/battle/scenarios/standard.ts";
+import { createEventBus, type EventHandler } from "../src/battle/engine/event.ts";
+import type { Action, BattleState } from "../src/battle/domain/types.ts";
 
 const EXPECTED_LOGS = [
   "=== バトル開始 ===",

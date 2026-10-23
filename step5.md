@@ -161,7 +161,7 @@ export type EventHandler = {
 
 `createEventBus` の `register` と `emit` の引数、実行中登録のエラー、`emitDepth` の戻し方は変えない。priority の検証と、`emit` 内の一致ハンドラの安定ソートを追加する。ハンドラへ渡す Event、BattleState、Runner は既存と同じ参照とし、ソート用に Event をコピーしない。`beforeDamage.damage` の変更は次のハンドラに引き継がれ、最終値をHPへ1回適用する。
 
-スタックとキューは `src/battle/order.ts` に置く。
+スタックとキューは `src/battle/engine/order.ts` に置く。
 
 ```typescript
 export type OrderTask = {
@@ -186,7 +186,7 @@ A が C のあとに D も `schedule` する場合の name は次のとおりと
 | スタック | A, C, D, B |
 | キュー | A, B, C, D |
 
-優先度シナリオの入口は `scenario.ts` に追加する。`runStaticScenario` には `lateContact` を登録しない。
+優先度シナリオの入口は `scenarios/static.ts` に追加する。`runStaticScenario` には `lateContact` を登録しない。
 
 ```typescript
 export function runPriorityScenario(options?: {
@@ -203,18 +203,22 @@ export function runPriorityScenario(options?: {
 
 ```text
 src/battle/
-├── types.ts
-├── pokemon.ts     ポケモン検索と名前
-├── battle-flow.ts 共通のバトル進行と初期状態生成
-├── event.ts       同じ Event を priority で安定ソート
-├── order.ts       追加。スタックとキューの比較
-├── section.ts
-├── status.ts
-├── handlers.ts    せいでんきとクラボのみ。priority は省略
-├── battle.ts
-├── scenario.ts    runPriorityScenario を追加
-├── turn.ts
-└── actions.ts
+├── engine/
+│   ├── section.ts     Section実行・上限・ターン計測
+│   ├── event.ts       Event配信・優先度
+│   └── order.ts       Step 5のスタック・キュー比較
+├── domain/
+│   ├── types.ts       バトルの型
+│   ├── pokemon.ts     ポケモン検索と名前
+│   ├── actions.ts     行動選択・順序決定・攻撃
+│   ├── status.ts      まひ付与と治療
+│   └── handlers.ts    せいでんきとクラボのみ
+├── flow/
+│   ├── battle-flow.ts 共通のバトル進行と初期状態生成
+│   └── turn.ts        ターンの組み立て
+└── scenarios/
+    ├── standard.ts    標準シナリオ
+    └── static.ts      連鎖・優先度シナリオ
 ```
 
 ## 7. 実行ログ

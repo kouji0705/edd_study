@@ -1,5 +1,5 @@
 import { findPokemon } from "./pokemon.ts";
-import type { EventBus, EventHandler } from "./event.ts";
+import type { EventBus, EventHandler } from "../engine/event.ts";
 import { createApplyStatusSection, createCureStatusSection } from "./status.ts";
 
 export function createStaticHandler(staticActivates: boolean, events: EventBus): EventHandler {

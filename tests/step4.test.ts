@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { executeAction } from "../src/battle/actions.ts";
-import { runBattle } from "../src/battle/battle.ts";
-import { createEventBus, type EventBus, type EventHandler } from "../src/battle/event.ts";
-import { registerStaticHandlers } from "../src/battle/handlers.ts";
-import { createSectionRunner, type Section } from "../src/battle/section.ts";
-import { createStaticBattleSection, runStaticScenario } from "../src/battle/scenario.ts";
-import { createCureStatusSection } from "../src/battle/status.ts";
-import { createTurnSection } from "../src/battle/turn.ts";
-import type { Action, BattleState, Pokemon } from "../src/battle/types.ts";
+import { executeAction } from "../src/battle/domain/actions.ts";
+import { runBattle } from "../src/battle/scenarios/standard.ts";
+import { createEventBus, type EventBus, type EventHandler } from "../src/battle/engine/event.ts";
+import { registerStaticHandlers } from "../src/battle/domain/handlers.ts";
+import { createSectionRunner, type Section } from "../src/battle/engine/section.ts";
+import { createStaticBattleSection, runStaticScenario } from "../src/battle/scenarios/static.ts";
+import { createCureStatusSection } from "../src/battle/domain/status.ts";
+import { createTurnSection } from "../src/battle/flow/turn.ts";
+import type { Action, BattleState, Pokemon } from "../src/battle/domain/types.ts";
 
 const STANDARD_LOGS = [
   "=== バトル開始 ===",

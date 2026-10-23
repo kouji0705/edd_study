@@ -4,10 +4,11 @@ import {
   createSelectActionsSection,
   selectActions,
   type SelectActions,
-} from "./actions.ts";
-import { createEventBus, type EventBus } from "./event.ts";
-import { createSectionRunner, type ActionBuffer, type Section } from "./section.ts";
-import type { BattleState } from "./types.ts";
+  type ActionBuffer,
+} from "../domain/actions.ts";
+import { createEventBus, type EventBus } from "../engine/event.ts";
+import { createSectionRunner, type Section } from "../engine/section.ts";
+import type { BattleState } from "../domain/types.ts";
 
 function createTurnStartSection(): Section {
   return {

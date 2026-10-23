@@ -6,10 +6,10 @@ import {
   createExecuteActionSection,
   createSelectActionsSection,
   selectActions,
-} from "../src/battle/actions.ts";
-import { createBattleSection } from "../src/battle/battle.ts";
-import { createSectionRunner, type Section } from "../src/battle/section.ts";
-import type { Action, BattleState } from "../src/battle/types.ts";
+} from "../src/battle/domain/actions.ts";
+import { createBattleSection } from "../src/battle/scenarios/standard.ts";
+import { createSectionRunner, type Section } from "../src/battle/engine/section.ts";
+import type { Action, BattleState } from "../src/battle/domain/types.ts";
 
 const EXPECTED_LOGS = [
   "=== バトル開始 ===",

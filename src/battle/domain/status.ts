@@ -1,6 +1,6 @@
 import { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
-import type { EventBus } from "./event.ts";
-import type { Section } from "./section.ts";
+import type { EventBus } from "../engine/event.ts";
+import type { Section } from "../engine/section.ts";
 import type { PokemonId } from "./types.ts";
 
 export function createApplyStatusSection(pokemonId: PokemonId, events: EventBus): Section {

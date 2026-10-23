@@ -1,5 +1,5 @@
-import { createSectionRunner, type Section } from "./section.ts";
-import type { BattleState, Pokemon } from "./types.ts";
+import { createSectionRunner, type Section } from "../engine/section.ts";
+import type { BattleState, Pokemon } from "../domain/types.ts";
 
 function createBattleStartSection(): Section {
   return {

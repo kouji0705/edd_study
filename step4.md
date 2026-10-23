@@ -250,20 +250,25 @@ Section 名は `CureStatus:リザードン` とする。
 
 ```text
 src/battle/
-├── types.ts       特性、持ち物、状態異常、接触
-├── pokemon.ts     ポケモン検索と名前
-├── battle-flow.ts 共通の開始・登場・ターン実行と初期状態生成
-├── event.ts       statusChanged と Runner の受け渡し
-├── section.ts     1ターンの実行上限
-├── status.ts      ApplyStatus と CureStatus
-├── handlers.ts    せいでんきとクラボのみ
-├── battle.ts      標準シナリオ。ハンドラは登録しない
-├── scenario.ts    連鎖シナリオとテスト用の Section 構築
-├── turn.ts
-└── actions.ts     contact を Event に載せる
+├── engine/
+│   ├── section.ts     Section実行・上限・ターン計測
+│   ├── event.ts       Event配信・優先度
+│   └── order.ts       Step 5のスタック・キュー比較
+├── domain/
+│   ├── types.ts       バトルの型
+│   ├── pokemon.ts     ポケモン検索と名前
+│   ├── actions.ts     行動選択・順序決定・攻撃
+│   ├── status.ts      まひ付与と治療
+│   └── handlers.ts    せいでんきとクラボのみ
+├── flow/
+│   ├── battle-flow.ts 共通のバトル進行と初期状態生成
+│   └── turn.ts        ターンの組み立て
+└── scenarios/
+    ├── standard.ts    標準シナリオ
+    └── static.ts      連鎖・優先度シナリオ
 ```
 
-連鎖シナリオの入口は `src/battle/scenario.ts` の `runStaticScenario` とする。`npm start` はせいでんき成功・クラボのみ所持の `runStaticScenario` を表示する。`runBattle()` はハンドラなしの標準シナリオのまま残す。
+連鎖シナリオの入口は `src/battle/scenarios/static.ts` の `runStaticScenario` とする。`npm start` はせいでんき成功・クラボのみ所持の `runStaticScenario` を表示する。`runBattle()` はハンドラなしの標準シナリオのまま残す。
 
 ```typescript
 export function runStaticScenario(options: {
@@ -275,9 +280,9 @@ export function runStaticScenario(options: {
 
 この関数がバトルごとの EventBus を作り、`static`、`cheri` の順に登録してから、`createSectionRunner(options.trace)` で Section を実行する。トレースは `BattleState.logs` と分離し、引数の配列へ追加する。
 
-現行の `selectActions` は全員に「じしん」を割り当てるため、そのまま使わない。行動選択関数を `createSelectActionsSection` と `createTurnSection` の末尾の省略可能な引数で注入できるようにし、既定値は既存の `selectActions` とする。連鎖用の選択関数は2章の Action 2件を新しく作り、同じ形式の選択ログを出す。行動順決定・攻撃実行・ターン開始終了は既存 Section を共用する。新しいIDを追加したら `pokemon.ts` の `POKEMON_NAMES` にも2件追加する。
+現行の `selectActions` は全員に「じしん」を割り当てるため、そのまま使わない。行動選択関数を `createSelectActionsSection` と `createTurnSection` の末尾の省略可能な引数で注入できるようにし、既定値は既存の `selectActions` とする。連鎖用の選択関数は2章の Action 2件を新しく作り、同じ形式の選択ログを出す。行動順決定・攻撃実行・ターン開始終了は既存 Section を共用する。新しいIDを追加したら `domain/pokemon.ts` の `POKEMON_NAMES` にも2件追加する。
 
-`scenario.ts` はテストで同じ構成を実行できる Section 構築関数も公開し、EventBus を注入可能にする。異常系はテスト側が保持する state と Runner で実行し、例外後のログとトレースを検査する。`runStaticScenario` だけに処理を閉じ込めてテストで同じ処理を複製しない。
+`scenarios/static.ts` はテストで同じ構成を実行できる Section 構築関数も公開し、EventBus を注入可能にする。異常系はテスト側が保持する state と Runner で実行し、例外後のログとトレースを検査する。`runStaticScenario` だけに処理を閉じ込めてテストで同じ処理を複製しない。
 
 ## 8. 成功時の実行ログ
 

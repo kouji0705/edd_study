@@ -1,13 +1,14 @@
-import { createEventBus, type BattleEvent, type EventBus } from "./event.ts";
-import { createSectionRunner, type ActionBuffer, type Section, type SectionRunner } from "./section.ts";
+import { createEventBus, type BattleEvent, type EventBus } from "../engine/event.ts";
+import { createSectionRunner, type Section, type SectionRunner } from "../engine/section.ts";
 import { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
 import type { Action, BattleState } from "./types.ts";
 
-// 既存の利用側との互換性を保つ。新しい参照は pokemon.ts から行う。
-export { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
-
 const MOVE_EARTHQUAKE = "じしん";
 const BASE_DAMAGE = 20;
+
+export type ActionBuffer = {
+  actions: Action[];
+};
 
 export type SelectActions = (state: BattleState) => Action[];
 

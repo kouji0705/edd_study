@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { decideActionOrder, executeAction, selectActions } from "../src/battle/actions.ts";
-import { runBattle } from "../src/battle/battle.ts";
-import { runTurn } from "../src/battle/turn.ts";
-import type { BattleState } from "../src/battle/types.ts";
+import { decideActionOrder, executeAction, selectActions } from "../src/battle/domain/actions.ts";
+import { runBattle } from "../src/battle/scenarios/standard.ts";
+import { runTurn } from "../src/battle/flow/turn.ts";
+import type { BattleState } from "../src/battle/domain/types.ts";
 import { formatBattleResult } from "../src/main.ts";
 
 const EXPECTED_LOGS = [
