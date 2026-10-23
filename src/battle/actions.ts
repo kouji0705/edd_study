@@ -1,22 +1,26 @@
-import type { BattleEvent, EventBus } from "./event.ts";
-import type { ActionBuffer, Section } from "./section.ts";
+import { createEventBus, type BattleEvent, type EventBus } from "./event.ts";
+import { createSectionRunner, type ActionBuffer, type Section, type SectionRunner } from "./section.ts";
 import type { Action, BattleState, Pokemon, PokemonId } from "./types.ts";
 
 const MOVE_EARTHQUAKE = "じしん";
 const BASE_DAMAGE = 20;
 
-const POKEMON_NAMES: Record<PokemonId, string> = {
+export const POKEMON_NAMES: Record<PokemonId, string> = {
   garchomp: "ガブリアス",
   hippowdon: "カバルドン",
+  charizard: "リザードン",
+  pikachu: "ピカチュウ",
 };
 
-function findPokemon(state: BattleState, id: PokemonId): Pokemon {
+export function findPokemon(state: BattleState, id: PokemonId): Pokemon {
   const pokemon = state.pokemon.find((candidate) => candidate.id === id);
   if (pokemon === undefined) {
     throw new Error(`ポケモンが見つかりません: ${id}`);
   }
   return pokemon;
 }
+
+export type SelectActions = (state: BattleState) => Action[];
 
 export function selectActions(state: BattleState): Action[] {
   return state.pokemon.map((pokemon) => {
@@ -52,9 +56,13 @@ export function executeAction(
   state: BattleState,
   action: Action,
   events?: EventBus,
+  runner?: SectionRunner,
 ): BattleState {
+  const bus = events ?? createEventBus();
+  const activeRunner = runner ?? createSectionRunner();
   const actor = findPokemon(state, action.actorId);
   const target = findPokemon(state, action.targetId);
+  const contact = action.contact ?? false;
 
   state.logs.push(`${actor.name}の${action.move}！`);
 
@@ -64,31 +72,37 @@ export function executeAction(
     targetId: target.id,
     move: action.move,
     damage: BASE_DAMAGE,
+    contact,
   };
-  events?.emit(damageEvent, state);
+  bus.emit(damageEvent, state, activeRunner);
 
   target.currentHp -= damageEvent.damage;
   state.logs.push(`${target.name}に${damageEvent.damage}ダメージ！`);
 
-  events?.emit(
+  bus.emit(
     {
       kind: "afterDamage",
       actorId: actor.id,
       targetId: target.id,
       move: action.move,
       damage: damageEvent.damage,
+      contact,
     },
     state,
+    activeRunner,
   );
 
   return state;
 }
 
-export function createSelectActionsSection(buffer: ActionBuffer): Section {
+export function createSelectActionsSection(
+  buffer: ActionBuffer,
+  select: SelectActions = selectActions,
+): Section {
   return {
     name: "SelectActions",
     run(state) {
-      buffer.actions = selectActions(state);
+      buffer.actions = select(state);
       return state;
     },
   };
@@ -107,8 +121,8 @@ export function createDecideActionOrderSection(buffer: ActionBuffer): Section {
 export function createExecuteActionSection(action: Action, events?: EventBus): Section {
   return {
     name: `ExecuteAction:${POKEMON_NAMES[action.actorId]}`,
-    run(state) {
-      return executeAction(state, action, events);
+    run(state, runner) {
+      return executeAction(state, action, events, runner);
     },
   };
 }

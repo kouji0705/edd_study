@@ -89,6 +89,9 @@ describe("Step 3", () => {
     const order: string[] = [];
     events.register(
       handler("first", "beforeDamage", (event) => {
+        if (event.kind !== "beforeDamage") {
+          return;
+        }
         order.push("first");
         event.damage = 10;
       }),
@@ -100,6 +103,9 @@ describe("Step 3", () => {
     );
     events.register(
       handler("second", "beforeDamage", (event) => {
+        if (event.kind !== "beforeDamage") {
+          return;
+        }
         order.push("second");
         event.damage += 1;
       }),
@@ -120,6 +126,9 @@ describe("Step 3", () => {
     const events = createEventBus();
     events.register(
       handler("bonus", "beforeDamage", (event) => {
+        if (event.kind !== "beforeDamage") {
+          return;
+        }
         event.damage += 10;
       }),
     );
@@ -144,6 +153,9 @@ describe("Step 3", () => {
     const hpAfterHit: number[] = [];
     events.register(
       handler("watch", "afterDamage", (event, state) => {
+        if (event.kind === "statusChanged") {
+          return;
+        }
         const target = state.pokemon.find((pokemon) => pokemon.id === event.targetId);
         assert.ok(target);
         hpAfterHit.push(target.currentHp);
@@ -168,6 +180,9 @@ describe("Step 3", () => {
     const events = createEventBus();
     events.register(
       handler("too-late", "afterDamage", (event) => {
+        if (event.kind !== "afterDamage") {
+          return;
+        }
         event.damage = 0;
       }),
     );

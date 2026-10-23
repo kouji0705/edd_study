@@ -6,13 +6,14 @@ TypeScriptを使い、バトルシステムを段階的に実装しながら、S
 
 ## 現在の状態
 
-Step 3（EventとEventHandler）を実装済みです。ハンドラがないときは Step 2 と同じ結果です。
+Step 4（割り込みと連鎖）を実装済みです。`npm start` はリザードン対ピカチュウを表示します。ハンドラなしの `runBattle()` は Step 3 と同じ結果です。
 
 - このREADME：学習全体の方針とロードマップ
 - [Step 1の設計書](step1.md)：1ターンの仕様、処理図、期待結果、テストケース
 - [Step 2の設計書](step2.md)：Sectionの階層、入出力、テストケース
+- [Step 4の設計書](step4.md)：せいでんきとクラボのみの割り込み
 - 実装：`src/main.ts` と `src/battle/`
-- テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`
+- テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`、`tests/step4.test.ts`
 
 ## 実行方法
 
@@ -117,6 +118,8 @@ Sectionの処理中にEventを発火させ、個別の仕様をEventHandlerで�
 - 割り込み後の処理への復帰
 
 割り込み先を完了してから呼び出し元の次の処理に戻る、深さ優先の順序を採用します。まひは状態が変化したときだけ通知し、きのみは回復通知より前に消費済みにします。異常な循環に備え、1ターン内のSection実行数・Event発火数に上限を設け、超過時は原因をログに残してエラーで停止します。
+
+詳細は[Step 4の設計書](step4.md)を参照してください。
 
 **確認条件：まひ付与 → きのみ消費 → まひ回復 → 元の処理へ復帰の順序と、最終状態・持ち物消費が一致すること。発動失敗時や持ち物なしの場合も検証します。**
 

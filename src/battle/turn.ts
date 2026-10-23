@@ -2,8 +2,10 @@ import {
   createDecideActionOrderSection,
   createExecuteActionsSection,
   createSelectActionsSection,
+  selectActions,
+  type SelectActions,
 } from "./actions.ts";
-import type { EventBus } from "./event.ts";
+import { createEventBus, type EventBus } from "./event.ts";
 import { createSectionRunner, type ActionBuffer, type Section } from "./section.ts";
 import type { BattleState } from "./types.ts";
 
@@ -28,21 +30,30 @@ function createTurnEndSection(): Section {
   };
 }
 
-export function createTurnSection(events?: EventBus): Section {
+export function createTurnSection(
+  events?: EventBus,
+  select: SelectActions = selectActions,
+): Section {
+  const bus = events ?? createEventBus();
   return {
     name: "Turn",
     run(state, runner) {
-      const buffer: ActionBuffer = { actions: [] };
-      return runner.runAll(
-        [
-          createTurnStartSection(),
-          createSelectActionsSection(buffer),
-          createDecideActionOrderSection(buffer),
-          createExecuteActionsSection(buffer, events),
-          createTurnEndSection(),
-        ],
-        state,
-      );
+      runner.beginTurn();
+      try {
+        const buffer: ActionBuffer = { actions: [] };
+        return runner.runAll(
+          [
+            createTurnStartSection(),
+            createSelectActionsSection(buffer, select),
+            createDecideActionOrderSection(buffer),
+            createExecuteActionsSection(buffer, bus),
+            createTurnEndSection(),
+          ],
+          state,
+        );
+      } finally {
+        runner.endTurn();
+      }
     },
   };
 }
