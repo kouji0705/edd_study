@@ -1,4 +1,4 @@
-import { findPokemon } from "./actions.ts";
+import { findPokemon } from "./pokemon.ts";
 import type { EventBus, EventHandler } from "./event.ts";
 import { createApplyStatusSection, createCureStatusSection } from "./status.ts";
 

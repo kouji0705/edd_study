@@ -16,6 +16,12 @@ Step 5（実行順序の管理）を実装済みです。`npm start` はリザ�
 - 実装：`src/main.ts` と `src/battle/`
 - テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`、`tests/step4.test.ts`、`tests/step5.test.ts`
 
+## 実装の責務
+
+`battle.ts` と `scenario.ts` は、ポケモン構成・技選択・ハンドラ登録を決めます。共通の開始・登場・ターン実行は `battle-flow.ts` にまとめ、実行のたびに新しい状態を作ります。ポケモン検索と名前の定義は `pokemon.ts` に置き、攻撃・状態異常・特性から参照します。
+
+`section.ts` は実行順と上限を管理します。ターン境界は表示名ではなく `Section.scope: "turn"` で宣言し、Runner が計測の開始・終了と再入禁止を担当します。Section は必ず Runner 経由で実行します。`turn.ts` はターン内の処理の組み立てを担当します。
+
 ## 実行方法
 
 Node.js 26 で動作を確認しています。TypeScriptは型情報を除去して Node.js が直接実行します。

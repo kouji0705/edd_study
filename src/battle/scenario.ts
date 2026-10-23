@@ -1,6 +1,8 @@
 import { createEventBus, type EventBus, type EventHandler } from "./event.ts";
 import { registerStaticHandlers } from "./handlers.ts";
-import { createSectionRunner, type Section } from "./section.ts";
+import { createBattleFlow, runNewBattle } from "./battle-flow.ts";
+import { POKEMON_NAMES } from "./pokemon.ts";
+import type { Section } from "./section.ts";
 import { createTurnSection } from "./turn.ts";
 import type { Action, BattleState, Item, Pokemon } from "./types.ts";
 
@@ -12,7 +14,7 @@ export type StaticScenarioOptions = {
 function createCharizard(item: Item | undefined): Pokemon {
   return {
     id: "charizard",
-    name: "リザードン",
+    name: POKEMON_NAMES.charizard,
     currentHp: 100,
     maxHp: 100,
     speed: 100,
@@ -23,33 +25,11 @@ function createCharizard(item: Item | undefined): Pokemon {
 function createPikachu(): Pokemon {
   return {
     id: "pikachu",
-    name: "ピカチュウ",
+    name: POKEMON_NAMES.pikachu,
     currentHp: 100,
     maxHp: 100,
     speed: 90,
     ability: "static",
-  };
-}
-
-function createBattleStartSection(): Section {
-  return {
-    name: "BattleStart",
-    run(state) {
-      state.logs.push("=== バトル開始 ===");
-      return state;
-    },
-  };
-}
-
-function createAppearPokemonSection(name: string, createPokemon: () => Pokemon): Section {
-  return {
-    name: `AppearPokemon:${name}`,
-    run(state) {
-      const pokemon = createPokemon();
-      state.pokemon.push(pokemon);
-      state.logs.push(`${pokemon.name}が登場`);
-      return state;
-    },
   };
 }
 
@@ -71,20 +51,13 @@ export function createStaticBattleSection(
   events: EventBus,
   options: StaticScenarioOptions,
 ): Section {
-  return {
-    name: "Battle",
-    run(state, runner) {
-      return runner.runAll(
-        [
-          createBattleStartSection(),
-          createAppearPokemonSection("リザードン", () => createCharizard(options.attackerItem)),
-          createAppearPokemonSection("ピカチュウ", createPikachu),
-          createTurnSection(events, selectStaticActions),
-        ],
-        state,
-      );
-    },
-  };
+  return createBattleFlow(
+    [
+      { name: POKEMON_NAMES.charizard, create: () => createCharizard(options.attackerItem) },
+      { name: POKEMON_NAMES.pikachu, create: createPikachu },
+    ],
+    createTurnSection(events, selectStaticActions),
+  );
 }
 
 function createLateContactHandler(priority: number): EventHandler {
@@ -111,15 +84,9 @@ export function runPriorityScenario(options?: {
   const events = createEventBus();
   events.register(createLateContactHandler(options?.latePriority ?? 1));
   registerStaticHandlers(events, true);
-  const state: BattleState = {
-    turn: 0,
-    pokemon: [],
-    logs: [],
-  };
-  const runner = createSectionRunner(options?.trace);
-  return runner.run(
+  return runNewBattle(
     createStaticBattleSection(events, { staticActivates: true, attackerItem: "cheri" }),
-    state,
+    options?.trace,
   );
 }
 
@@ -128,11 +95,5 @@ export function runStaticScenario(
 ): BattleState {
   const events = createEventBus();
   registerStaticHandlers(events, options.staticActivates);
-  const state: BattleState = {
-    turn: 0,
-    pokemon: [],
-    logs: [],
-  };
-  const runner = createSectionRunner(options.trace);
-  return runner.run(createStaticBattleSection(events, options), state);
+  return runNewBattle(createStaticBattleSection(events, options), options.trace);
 }

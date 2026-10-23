@@ -119,7 +119,7 @@ sequenceDiagram
 
 カウンタは Runner ごとに保持し、EventBus は `emit` に渡された Runner 経由で Event 数を加算する。グローバル変数や EventBus 独自のカウンタは使わない。標準シナリオでも、ハンドラがなくても同じ上限を使う。
 
-- `Turn.run` の入口でターン計測を開始し、両カウンタを 0 にする。`finally` で計測を終了する。
+- `Turn` は `scope: "turn"` を持つ。Runner がその `run` を呼ぶ直前にターン計測を開始し、両カウンタを 0 にする。正常終了・例外終了とも Runner の `finally` で計測を終了する。表示名を判定に使わず、`Turn.run` 自身では開始・終了を重ねて呼ばない。
 - 計測対象は `Turn` の子以下である。`Battle`、登場処理、`Turn` 自身は含めず、`TurnStart` から `TurnEnd` までの全 Section を含める。何もしない `ApplyStatus` / `CureStatus` も1回に数える。`runAll` 自体は数えない。
 - Section は `run` を呼ぶ直前、Event はハンドラを呼ぶ前に1回数える。ハンドラが0件でも Event は数える。32回目は成功し、33回目は実行しない。入れ子から戻ってもカウンタは減らさない。
 - 計測中に別の `Turn` を開始しようとしたら、カウンタをリセットせず `Error("ターン実行中にTurnを開始できません")` を投げる。開始失敗で外側の計測を終了しない。
@@ -251,6 +251,8 @@ Section 名は `CureStatus:リザードン` とする。
 ```text
 src/battle/
 ├── types.ts       特性、持ち物、状態異常、接触
+├── pokemon.ts     ポケモン検索と名前
+├── battle-flow.ts 共通の開始・登場・ターン実行と初期状態生成
 ├── event.ts       statusChanged と Runner の受け渡し
 ├── section.ts     1ターンの実行上限
 ├── status.ts      ApplyStatus と CureStatus
@@ -273,7 +275,7 @@ export function runStaticScenario(options: {
 
 この関数がバトルごとの EventBus を作り、`static`、`cheri` の順に登録してから、`createSectionRunner(options.trace)` で Section を実行する。トレースは `BattleState.logs` と分離し、引数の配列へ追加する。
 
-現行の `selectActions` は全員に「じしん」を割り当てるため、そのまま使わない。行動選択関数を `createSelectActionsSection` と `createTurnSection` の末尾の省略可能な引数で注入できるようにし、既定値は既存の `selectActions` とする。連鎖用の選択関数は2章の Action 2件を新しく作り、同じ形式の選択ログを出す。行動順決定・攻撃実行・ターン開始終了は既存 Section を共用する。新しいIDを追加したら `actions.ts` の `POKEMON_NAMES` にも2件追加する。
+現行の `selectActions` は全員に「じしん」を割り当てるため、そのまま使わない。行動選択関数を `createSelectActionsSection` と `createTurnSection` の末尾の省略可能な引数で注入できるようにし、既定値は既存の `selectActions` とする。連鎖用の選択関数は2章の Action 2件を新しく作り、同じ形式の選択ログを出す。行動順決定・攻撃実行・ターン開始終了は既存 Section を共用する。新しいIDを追加したら `pokemon.ts` の `POKEMON_NAMES` にも2件追加する。
 
 `scenario.ts` はテストで同じ構成を実行できる Section 構築関数も公開し、EventBus を注入可能にする。異常系はテスト側が保持する state と Runner で実行し、例外後のログとトレースを検査する。`runStaticScenario` だけに処理を閉じ込めてテストで同じ処理を複製しない。
 

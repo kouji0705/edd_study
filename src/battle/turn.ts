@@ -37,23 +37,19 @@ export function createTurnSection(
   const bus = events ?? createEventBus();
   return {
     name: "Turn",
+    scope: "turn",
     run(state, runner) {
-      runner.beginTurn();
-      try {
-        const buffer: ActionBuffer = { actions: [] };
-        return runner.runAll(
-          [
-            createTurnStartSection(),
-            createSelectActionsSection(buffer, select),
-            createDecideActionOrderSection(buffer),
-            createExecuteActionsSection(buffer, bus),
-            createTurnEndSection(),
-          ],
-          state,
-        );
-      } finally {
-        runner.endTurn();
-      }
+      const buffer: ActionBuffer = { actions: [] };
+      return runner.runAll(
+        [
+          createTurnStartSection(),
+          createSelectActionsSection(buffer, select),
+          createDecideActionOrderSection(buffer),
+          createExecuteActionsSection(buffer, bus),
+          createTurnEndSection(),
+        ],
+        state,
+      );
     },
   };
 }

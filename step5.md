@@ -204,6 +204,8 @@ export function runPriorityScenario(options?: {
 ```text
 src/battle/
 ├── types.ts
+├── pokemon.ts     ポケモン検索と名前
+├── battle-flow.ts 共通のバトル進行と初期状態生成
 ├── event.ts       同じ Event を priority で安定ソート
 ├── order.ts       追加。スタックとキューの比較
 ├── section.ts

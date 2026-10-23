@@ -1,24 +1,13 @@
 import { createEventBus, type BattleEvent, type EventBus } from "./event.ts";
 import { createSectionRunner, type ActionBuffer, type Section, type SectionRunner } from "./section.ts";
-import type { Action, BattleState, Pokemon, PokemonId } from "./types.ts";
+import { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
+import type { Action, BattleState } from "./types.ts";
+
+// 既存の利用側との互換性を保つ。新しい参照は pokemon.ts から行う。
+export { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
 
 const MOVE_EARTHQUAKE = "じしん";
 const BASE_DAMAGE = 20;
-
-export const POKEMON_NAMES: Record<PokemonId, string> = {
-  garchomp: "ガブリアス",
-  hippowdon: "カバルドン",
-  charizard: "リザードン",
-  pikachu: "ピカチュウ",
-};
-
-export function findPokemon(state: BattleState, id: PokemonId): Pokemon {
-  const pokemon = state.pokemon.find((candidate) => candidate.id === id);
-  if (pokemon === undefined) {
-    throw new Error(`ポケモンが見つかりません: ${id}`);
-  }
-  return pokemon;
-}
 
 export type SelectActions = (state: BattleState) => Action[];
 

@@ -1,4 +1,4 @@
-import { findPokemon, POKEMON_NAMES } from "./actions.ts";
+import { findPokemon, POKEMON_NAMES } from "./pokemon.ts";
 import type { EventBus } from "./event.ts";
 import type { Section } from "./section.ts";
 import type { PokemonId } from "./types.ts";

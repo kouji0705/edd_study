@@ -547,3 +547,71 @@ function runWithEvents(events: EventBus, attackerItem: "cheri" | undefined = und
   );
   return state;
 }
+
+describe("Sectionの責務と再利用", () => {
+  it("表示名がTurnでも通常Sectionは上限を回避しない", () => {
+    const state = emptyState();
+    const trace: string[] = [];
+    let runs = 0;
+    const loop: Section = {
+      name: "Turn",
+      run(current, runner) {
+        runs += 1;
+        // 旧実装でもテスト自体が無限再帰しないようにする。
+        return runs < 40 ? runner.run(loop, current) : current;
+      },
+    };
+    assert.throws(
+      () => createSectionRunner(trace).run(loop, state),
+      { message: "1ターンのSection実行数が上限32を超えました: Turn" },
+    );
+    assert.equal(runs, 32);
+    assert.equal(trace.length, 33);
+  });
+
+  it("本物のターンは表示名を変えても計測を開始できる", () => {
+    const runner = createSectionRunner();
+    const state = pair();
+    for (let i = 0; i < 32; i += 1) runner.run(noop("Preparation"), state);
+    const turn = createTurnSection();
+    turn.name = "RenamedTurn";
+    runner.run(turn, state);
+    assert.equal(state.turn, 1);
+    assert.deepEqual(state.pokemon.map((pokemon) => pokemon.currentHp), [80, 80]);
+    assert.equal(state.logs.at(-1), "=== ターン1 終了 ===");
+  });
+
+  it("入れ子のTurnが失敗しても次の独立したターンを同じRunnerで実行できる", () => {
+    const runner = createSectionRunner();
+    const events = createEventBus();
+    events.register(handler("nested-turn", "beforeDamage", (_event, state, activeRunner) => {
+      activeRunner.run(createTurnSection(), state);
+    }));
+    const failed = pair();
+    assert.throws(
+      () => runner.run(createTurnSection(events), failed),
+      { message: "ターン実行中にTurnを開始できません" },
+    );
+    assert.equal(failed.turn, 1);
+    assert.deepEqual(failed.pokemon.map((pokemon) => pokemon.currentHp), [100, 100]);
+    assert.equal(failed.logs.includes("=== ターン1 終了 ==="), false);
+    const next = pair();
+    runner.run(createTurnSection(), next);
+    assert.equal(next.turn, 1);
+    assert.equal(next.logs.at(-1), "=== ターン1 終了 ===");
+  });
+
+  it("同じ連鎖Battle Sectionを再利用しても持ち物と状態を共有しない", () => {
+    const events = createEventBus();
+    registerStaticHandlers(events, true);
+    const battle = createStaticBattleSection(events, { staticActivates: true, attackerItem: "cheri" });
+    const runner = createSectionRunner();
+    const first = runner.run(battle, emptyState());
+    const second = runner.run(battle, emptyState());
+    assert.deepEqual(first.logs, SUCCESS_LOGS);
+    assert.deepEqual(second.logs, SUCCESS_LOGS);
+    assert.notStrictEqual(first.pokemon[0], second.pokemon[0]);
+    assert.equal(second.pokemon[0]?.item, undefined);
+    assert.equal(second.pokemon[0]?.status, undefined);
+  });
+});
