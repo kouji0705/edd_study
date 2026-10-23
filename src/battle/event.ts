@@ -1,24 +1,35 @@
-import type { BattleState, PokemonId } from "./types.ts";
+import type { SectionRunner } from "./section.ts";
+import type { BattleState, PokemonId, Status } from "./types.ts";
 
-export type EventKind = "beforeDamage" | "afterDamage";
-
-export type BattleEvent = {
-  kind: EventKind;
+export type DamageEvent = {
+  kind: "beforeDamage" | "afterDamage";
   actorId: PokemonId;
   targetId: PokemonId;
   move: string;
   damage: number;
+  contact: boolean;
 };
+
+export type StatusChangedEvent = {
+  readonly kind: "statusChanged";
+  readonly pokemonId: PokemonId;
+  readonly previousStatus: Status | undefined;
+  readonly status: Status | undefined;
+};
+
+export type BattleEvent = DamageEvent | StatusChangedEvent;
+
+export type EventKind = BattleEvent["kind"];
 
 export type EventHandler = {
   name: string;
   kind: EventKind;
-  handle: (event: BattleEvent, state: BattleState) => void;
+  handle: (event: BattleEvent, state: BattleState, runner: SectionRunner) => void;
 };
 
 export type EventBus = {
   register: (handler: EventHandler) => void;
-  emit: (event: BattleEvent, state: BattleState) => void;
+  emit: (event: BattleEvent, state: BattleState, runner: SectionRunner) => void;
 };
 
 export function createEventBus(): EventBus {
@@ -32,12 +43,13 @@ export function createEventBus(): EventBus {
       }
       handlers.push(handler);
     },
-    emit(event, state) {
+    emit(event, state, runner) {
+      runner.countEvent(event.kind, state);
       const matched = handlers.filter((handler) => handler.kind === event.kind);
       emitDepth += 1;
       try {
         for (const handler of matched) {
-          handler.handle(event, state);
+          handler.handle(event, state, runner);
         }
       } finally {
         emitDepth -= 1;

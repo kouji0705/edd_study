@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node src/main.ts",
-    "test": "node --test tests/step1.test.ts tests/step2.test.ts tests/step3.test.ts",
+    "test": "node --test tests/step1.test.ts tests/step2.test.ts tests/step3.test.ts tests/step4.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
