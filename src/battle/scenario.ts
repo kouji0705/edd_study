@@ -1,4 +1,4 @@
-import { createEventBus, type EventBus } from "./event.ts";
+import { createEventBus, type EventBus, type EventHandler } from "./event.ts";
 import { registerStaticHandlers } from "./handlers.ts";
 import { createSectionRunner, type Section } from "./section.ts";
 import { createTurnSection } from "./turn.ts";
@@ -85,6 +85,42 @@ export function createStaticBattleSection(
       );
     },
   };
+}
+
+function createLateContactHandler(priority: number): EventHandler {
+  return {
+    name: "lateContact",
+    kind: "afterDamage",
+    priority,
+    handle(event, state) {
+      if (event.kind !== "afterDamage") {
+        return;
+      }
+      if (!event.contact) {
+        return;
+      }
+      state.logs.push("接触の確認が終わった");
+    },
+  };
+}
+
+export function runPriorityScenario(options?: {
+  latePriority?: number;
+  trace?: string[];
+}): BattleState {
+  const events = createEventBus();
+  events.register(createLateContactHandler(options?.latePriority ?? 1));
+  registerStaticHandlers(events, true);
+  const state: BattleState = {
+    turn: 0,
+    pokemon: [],
+    logs: [],
+  };
+  const runner = createSectionRunner(options?.trace);
+  return runner.run(
+    createStaticBattleSection(events, { staticActivates: true, attackerItem: "cheri" }),
+    state,
+  );
 }
 
 export function runStaticScenario(
