@@ -1,5 +1,5 @@
 import type { SectionRunner } from "./section.ts";
-import type { BattleState, PokemonId, Status } from "./types.ts";
+import type { BattleState, PokemonId, Status } from "../domain/types.ts";
 
 export type DamageEvent = {
   kind: "beforeDamage" | "afterDamage";

@@ -1,22 +1,24 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
-import { executeAction } from "../src/battle/actions.ts";
-import { runBattle } from "../src/battle/battle.ts";
+import { executeAction } from "../src/battle/domain/actions.ts";
+import { runBattle } from "../src/battle/scenarios/standard.ts";
 import {
   createEventBus,
   type BattleEvent,
   type EventBus,
   type EventHandler,
-} from "../src/battle/event.ts";
-import { runAsQueue, runAsStack, type OrderTask } from "../src/battle/order.ts";
-import { createSectionRunner } from "../src/battle/section.ts";
+} from "../src/battle/engine/event.ts";
+import { runAsQueue, runAsStack, type OrderTask } from "../src/battle/engine/order.ts";
+import { createSectionRunner } from "../src/battle/engine/section.ts";
 import {
   createStaticBattleSection,
   runPriorityScenario,
   runStaticScenario,
-} from "../src/battle/scenario.ts";
-import type { Action, BattleState } from "../src/battle/types.ts";
+} from "../src/battle/scenarios/static.ts";
+import type { Action, BattleState } from "../src/battle/domain/types.ts";
 
 const STANDARD_LOGS = [
   "=== バトル開始 ===",
@@ -193,7 +195,11 @@ describe("Step 5", () => {
   it("TC-01 既存シナリオはStep 4の結果を維持する", () => {
     const standard = runBattle();
     const chain = runStaticScenario({ staticActivates: true, attackerItem: "cheri" });
-    const main = readFileSync(new URL("../src/main.ts", import.meta.url), "utf8");
+    const output = execFileSync(
+      process.execPath,
+      [fileURLToPath(new URL("../src/main.ts", import.meta.url))],
+      { encoding: "utf8", cwd: tmpdir(), timeout: 10_000 },
+    );
 
     assert.equal(standard.turn, 1);
     assert.deepEqual(standard.logs, STANDARD_LOGS);
@@ -207,8 +213,11 @@ describe("Step 5", () => {
       chain.pokemon.map((pokemon) => pokemon.currentHp),
       [80, 80],
     );
-    assert.equal(main.includes("runStaticScenario"), true);
-    assert.equal(main.includes("runPriorityScenario"), false);
+    assert.deepEqual(output.trim().split(/\r?\n/).filter((line) => line !== ""), [
+      ...SUCCESS_LOGS,
+      "リザードン HP：80 / 100",
+      "ピカチュウ HP：80 / 100",
+    ]);
   });
 
   it("TC-02 小さいpriorityが先に完了し、確認ログの位置が変わる", () => {

@@ -16,6 +16,34 @@ Step 5（実行順序の管理）を実装済みです。`npm start` はリザ�
 - 実装：`src/main.ts` と `src/battle/`
 - テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`、`tests/step4.test.ts`、`tests/step5.test.ts`
 
+## 実装の責務
+
+学習するときは `scenarios → flow → domain → engine` の順に読むと、対戦条件から実行の仕組みまで追えます。
+
+```text
+src/battle/
+├── engine/             処理を動かす仕組み
+│   ├── section.ts      Section実行・トレース・実行上限
+│   ├── event.ts        通知・ハンドラ登録・優先度
+│   └── order.ts        スタックとキューの学習用比較
+├── domain/             バトルの状態とルール
+│   ├── types.ts        Pokemon・Action・BattleState
+│   ├── pokemon.ts      ポケモン検索・名前定義
+│   ├── actions.ts      行動選択・順序決定・攻撃
+│   ├── status.ts       状態異常の付与・回復
+│   └── handlers.ts     せいでんき・クラボのみ
+├── flow/               バトル全体の進行
+│   ├── battle-flow.ts  開始 → 登場 → ターン
+│   └── turn.ts         選択 → 順序決定 → 行動 → 終了
+└── scenarios/          学習条件の組み立て・実行入口
+    ├── standard.ts     ガブリアス対カバルドン
+    └── static.ts       せいでんき・クラボのみ・優先度比較
+```
+
+`scenarios` が構成とハンドラ登録を決め、`flow` が処理を組み立てます。ターン境界は `Section.scope: "turn"` で宣言し、`engine` の Runner が計測の開始・終了と再入禁止を管理します。Section は必ず Runner 経由で実行します。
+
+詳しい処理の追い方と旧配置との対応は [バトル実装の読み方](src/battle/README.md) を参照してください。
+
 ## 実行方法
 
 Node.js 26 で動作を確認しています。TypeScriptは型情報を除去して Node.js が直接実行します。
