@@ -6,14 +6,15 @@ TypeScriptを使い、バトルシステムを段階的に実装しながら、S
 
 ## 現在の状態
 
-Step 4（割り込みと連鎖）を実装済みです。`npm start` はリザードン対ピカチュウを表示します。ハンドラなしの `runBattle()` は Step 3 と同じ結果です。
+Step 5（実行順序の管理）を実装済みです。`npm start` はリザードン対ピカチュウを表示します。ハンドラなしの `runBattle()` と、せいでんき成功の連鎖は Step 4 と同じ結果です。
 
 - このREADME：学習全体の方針とロードマップ
 - [Step 1の設計書](step1.md)：1ターンの仕様、処理図、期待結果、テストケース
 - [Step 2の設計書](step2.md)：Sectionの階層、入出力、テストケース
 - [Step 4の設計書](step4.md)：せいでんきとクラボのみの割り込み
+- [Step 5の設計書](step5.md)：ハンドラの優先度、スタックとキュー
 - 実装：`src/main.ts` と `src/battle/`
-- テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`、`tests/step4.test.ts`
+- テスト：`tests/step1.test.ts`、`tests/step2.test.ts`、`tests/step3.test.ts`、`tests/step4.test.ts`、`tests/step5.test.ts`
 
 ## 実行方法
 
@@ -127,7 +128,7 @@ Sectionの処理中にEventを発火させ、個別の仕様をEventHandlerで�
 
 ### Step 5：実行順序の管理
 
-複数のイベントが発生したときの実行順序を整理します。
+複数のイベントが発生したときの実行順序を整理します。詳細は[Step 5の設計書](step5.md)を参照してください。
 
 - EventHandlerの実行順序
 - 優先順位
